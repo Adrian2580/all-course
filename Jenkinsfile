@@ -4,12 +4,6 @@ pipeline {
     agent none
     stages {
         stage('build') {
-
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
             steps {
                 script {
                     echo "Building the application..."
@@ -24,14 +18,13 @@ pipeline {
             }
         }
         stage('deploy') {
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
             steps {
                 script {
-                    echo "Deploying the application..."
+                    def dockerCmd = 'docker run -p 3000:3080 -d aborzymdocker/demo-app:latest'
+                    sshagent(['ec2-server-key']) {
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@18.159.51.24 ${dockerCmd}"
+                    }
+                    
                 }
             }
         }
