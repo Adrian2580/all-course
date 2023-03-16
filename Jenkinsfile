@@ -2,6 +2,9 @@
 
 pipeline {
     agent any
+    environment{
+        IMAGE_NAME='aborzymdocker/demo-app:latest'
+    }
     stages {
         stage('build') {
             steps {
@@ -22,7 +25,7 @@ pipeline {
                 script {
                     echo "Deploying the application to EC2..."
                     // def dockerComposeCommand = "docker-compose -f docker-compose.yaml up --detach"
-                    def shellCmd = "bash server-cmds.sh"
+                    def shellCmd = "bash server-cmds.sh ${IMAGE_NAME}"
 
                     sshagent(['ec2-server-key']){
                         sh "scp -o StrictHostKeyChecking=no server-cmds.sh ec2-user@52.57.154.251:/home/ec2-user"
