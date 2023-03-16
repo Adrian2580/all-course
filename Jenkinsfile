@@ -4,12 +4,6 @@ pipeline {
     agent none
     stages {
         stage('build') {
-
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
             steps {
                 script {
                     echo "Building the application..."
@@ -24,14 +18,14 @@ pipeline {
             }
         }
         stage('deploy') {
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
             steps {
                 script {
-                    echo "Deploying the application..."
+                    echo "Deploying the application to EC2..."
+                    def dockerComposeCommand = "docker-compose -f docker-compose.yaml up --detach"
+                    sshagent(['ec2-server-key']){
+                        sh "scp docker-compose.yaml ec2-user@52.57.154.251:/home/ec2-user"
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@52.57.154.251 ${dockerComposeCommand}"
+                    }
                 }
             }
         }
